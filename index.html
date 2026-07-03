@@ -3,41 +3,27 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Эпичный боевой магов — рейтинг</title>
+  <title>Эпичные схватки боевых магов — рейтинг</title>
 
   <link rel="stylesheet" href="style.css" />
 
-  <!-- Можно подключить шрифт, если есть интернет -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Russo+One&family=Montserrat:wght@400;600;800&display=swap" rel="stylesheet">
 </head>
 
 <body>
-  <!-- 
-    Фоновое изображение:
-    Замени ссылку в style="" на свою.
-  -->
-  <div 
-    class="page-bg"
-    style="background-image: url('https://images.unsplash.com/photo-1511512578047-dfb367046420?auto=format&fit=crop&w=1600&q=80');"
-  ></div>
+
 
   <div class="noise"></div>
 
-  <!-- Прелоадер -->
+  <!-- Новый прелоадер для карт -->
   <div class="preloader" id="preloader">
-    <div class="preloader-card">
-      <div class="magic-orb"></div>
-      <div class="preloader-title">Заряжаем заклинания...</div>
-      <div class="preloader-bar">
-        <span></span>
-      </div>
-      <div class="preloader-subtitle">Подсчитываем победы и жертвы</div>
+    <div class="cards-stack" id="preloaderCards">
+      <!-- Карты будут добавляться сюда через JS -->
     </div>
   </div>
 
-  <!-- Основной контент -->
   <main class="app" id="app">
     <section class="hero">
       <div class="hero-content">
