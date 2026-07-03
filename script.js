@@ -1,49 +1,49 @@
 // ===============================
 // ДАННЫЕ ИГРОКОВ
-// Меняй победы, жертвы и ссылки на аватарки здесь
+// Добавь обычную картинку (avatar) и грустную (sadAvatar)
 // ===============================
-
 const players = [
   {
     name: "Николай",
-    wins: 5,
-    kills: 18,
+    wins: 2,
+    kills: 5,
     title: "Архимаг хаоса",
-    avatar: "Nikolay.jpg"
+    avatar: "Nikolay.jpg",
+    sadAvatar: "Nikolay-sad.jpg" // <-- Грустный Коля
   },
   {
     name: "Данила",
-    wins: 3,
-    kills: 22,
+    wins: 1,
+    kills: 1,
     title: "Повелитель критов",
-    avatar: "Danila.jpg"
+    avatar: "Danila.jpg",
+    sadAvatar: "Danila-sad.jpg" // <-- Грустный Данила
   },
   {
     name: "Александр",
-    wins: 4,
-    kills: 14,
+    wins: 1,
+    kills: 2,
     title: "Заклинатель боли",
-    avatar: "Sasha.jpg"
+    avatar: "Sasha.jpg",
+    sadAvatar: "Sasha-sad.jpg" // <-- Грустный Саша
   },
   {
     name: "Никита",
-    wins: 2,
-    kills: 27,
+    wins: 0,
+    kills: 0,
     title: "Олух",
-    avatar: "Nikita.jpg"
+    avatar: "Nikita.jpg",
+    sadAvatar: "Nikita-sad.jpg" // <-- Грустный Никита
   }
 ];
 
 // ===============================
 // СОРТИРОВКА РЕЙТИНГА
-// Сначала по победам, потом по жертвам
 // ===============================
-
 const sortedPlayers = [...players].sort((a, b) => {
   if (b.wins !== a.wins) {
     return b.wins - a.wins;
   }
-
   return b.kills - a.kills;
 });
 
@@ -52,13 +52,17 @@ const ratingBody = document.getElementById("ratingBody");
 // ===============================
 // СОЗДАНИЕ ТАБЛИЦЫ
 // ===============================
-
 function renderRating() {
   ratingBody.innerHTML = "";
 
   sortedPlayers.forEach((player, index) => {
     const place = index + 1;
     const isLeader = place === 1;
+    const isLoser = place === sortedPlayers.length; // Проверка на последнее место
+
+    // Если игрок на последнем месте, ставим его личную грустную картинку
+    // (Если вдруг забыл добавить sadAvatar, поставится обычная)
+    const displayAvatar = isLoser ? (player.sadAvatar || player.avatar) : player.avatar;
 
     const tr = document.createElement("tr");
     tr.className = isLeader ? "leader" : "";
@@ -72,7 +76,7 @@ function renderRating() {
       <td>
         <div class="player-cell">
           <div class="avatar-wrap">
-            <img class="avatar" src="${player.avatar}" alt="${player.name}">
+            <img class="avatar" src="${displayAvatar}" alt="${player.name}">
             ${isLeader ? `<div class="leader-crown">👑</div>` : ""}
           </div>
 
@@ -118,35 +122,58 @@ function getStatus(place) {
 // ===============================
 // ПРЕЛОАДЕР И СТАРТОВЫЕ АНИМАЦИИ
 // ===============================
-
 window.addEventListener("load", () => {
   renderRating();
+  initPreloader();
+});
 
+function initPreloader() {
+  const stack = document.getElementById("preloaderCards");
   const preloader = document.getElementById("preloader");
   const app = document.getElementById("app");
 
-  // Минимальное время показа прелоадера, чтобы он выглядел красиво
+  // Идеально рандомное перемешивание массива (Алгоритм Фишера-Йетса)
+  const shuffledPlayers = [...players];
+  for (let i = shuffledPlayers.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [shuffledPlayers[i], shuffledPlayers[j]] = [shuffledPlayers[j], shuffledPlayers[i]];
+  }
+
+  // Создаем карты
+  shuffledPlayers.forEach((p, index) => {
+    const card = document.createElement("div");
+    card.className = "preloader-player-card";
+    
+    // В прелоадере показываем всегда нормальные лица (чтобы не спойлерить кто проиграл)
+    card.style.backgroundImage = `url('${p.avatar}')`;
+    
+    const rot = (Math.random() * 24 - 12).toFixed(1); 
+    card.style.setProperty('--final-rot', `${rot}deg`);
+    card.style.animationDelay = `${index * 0.6}s`; 
+    
+    stack.appendChild(card);
+  });
+
+  const totalPreloaderTime = (shuffledPlayers.length * 0.6 + 0.6 + 0.5) * 1000;
+
   setTimeout(() => {
     preloader.classList.add("hidden");
     app.classList.add("visible");
 
-    // Запускаем кубок и конфетти после появления сайта
     setTimeout(() => {
       startLeaderCelebration();
     }, 650);
-  }, 1500);
-});
+  }, totalPreloaderTime);
+}
 
 // ===============================
 // КУБОК И КОНФЕТТИ У ЛИДЕРА
 // ===============================
-
 function startLeaderCelebration() {
   const leaderRow = document.querySelector(".rating-table tbody tr.leader");
 
   if (!leaderRow) return;
 
-  // Чтобы кубок позиционировался относительно строки
   leaderRow.style.position = "relative";
 
   const burst = document.createElement("div");
@@ -161,7 +188,6 @@ function startLeaderCelebration() {
 
   createConfetti(burst);
 
-  // Через пару секунд конфетти исчезнет, кубок останется
   setTimeout(() => {
     const confettiPieces = burst.querySelectorAll(".confetti");
     confettiPieces.forEach(piece => piece.remove());
@@ -169,16 +195,7 @@ function startLeaderCelebration() {
 }
 
 function createConfetti(container) {
-  const colors = [
-    "#ff2bd6",
-    "#ffe66d",
-    "#31e6ff",
-    "#43ff9a",
-    "#ff9b21",
-    "#ff3b3b",
-    "#ffffff"
-  ];
-
+  const colors = ["#ff2bd6", "#ffe66d", "#31e6ff", "#43ff9a", "#ff9b21", "#ff3b3b", "#ffffff"];
   const piecesCount = 42;
 
   for (let i = 0; i < piecesCount; i++) {
@@ -197,10 +214,7 @@ function createConfetti(container) {
     piece.style.setProperty("--r", `${Math.random() * 720 - 360}deg`);
     piece.style.animationDelay = `${Math.random() * 0.22}s`;
 
-    if (Math.random() > 0.5) {
-      piece.style.borderRadius = "999px";
-    }
-
+    if (Math.random() > 0.5) piece.style.borderRadius = "999px";
     if (Math.random() > 0.55) {
       piece.style.width = "12px";
       piece.style.height = "6px";
