@@ -54,7 +54,6 @@ body {
   backdrop-filter: blur(3px);
 }
 
-/* Лёгкий шум поверх */
 .noise {
   position: fixed;
   inset: 0;
@@ -65,7 +64,7 @@ body {
     repeating-radial-gradient(circle at 0 0, rgba(255,255,255,0.9) 0 1px, transparent 1px 4px);
 }
 
-/* ================= PRELOADER ================= */
+/* ================= PRELOADER (Новый) ================= */
 
 .preloader {
   position: fixed;
@@ -84,80 +83,36 @@ body {
   visibility: hidden;
 }
 
-.preloader-card {
-  width: min(420px, calc(100% - 32px));
-  padding: 34px 28px;
-  border: 2px solid rgba(255, 255, 255, 0.16);
-  border-radius: 28px;
-  background: rgba(12, 4, 26, 0.86);
-  box-shadow:
-    0 0 40px rgba(255, 43, 214, 0.22),
-    inset 0 0 35px rgba(49, 230, 255, 0.08);
-  text-align: center;
+.cards-stack {
+  position: relative;
+  width: 160px;
+  height: 230px;
 }
 
-.magic-orb {
-  width: 92px;
-  height: 92px;
-  margin: 0 auto 22px;
-  border-radius: 50%;
-  background:
-    radial-gradient(circle at 35% 30%, #fff, #ffe66d 16%, #ff2bd6 42%, #8f28ff 70%);
-  box-shadow:
-    0 0 30px #ff2bd6,
-    0 0 70px rgba(143, 40, 255, 0.8),
-    inset -10px -16px 25px rgba(0,0,0,0.35);
-  animation: orbPulse 1.2s infinite alternate ease-in-out;
+.preloader-player-card {
+  position: absolute;
+  inset: 0;
+  border-radius: 14px;
+  border: 4px solid rgba(255, 255, 255, 0.9);
+  background-color: #241038;
+  background-size: cover;
+  background-position: center;
+  box-shadow: 0 15px 35px rgba(0,0,0,0.6), 0 0 20px rgba(255, 43, 214, 0.3);
+  
+  /* Начальное состояние (за экраном сверху, увеличенная) */
+  opacity: 0;
+  transform: translateY(-150px) scale(1.4) rotate(-20deg);
+  
+  /* Анимация (задержка задается в JS) */
+  animation: dropCard 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
 }
 
-@keyframes orbPulse {
-  from {
-    transform: scale(0.94) rotate(0deg);
-    filter: hue-rotate(0deg);
-  }
+@keyframes dropCard {
   to {
-    transform: scale(1.08) rotate(14deg);
-    filter: hue-rotate(45deg);
+    opacity: 1;
+    /* Конечный поворот задается через переменную в JS */
+    transform: translateY(0) scale(1) rotate(var(--final-rot));
   }
-}
-
-.preloader-title {
-  font-family: "Russo One", sans-serif;
-  font-size: 26px;
-  letter-spacing: 1px;
-  margin-bottom: 18px;
-  text-shadow: 0 0 14px rgba(255, 43, 214, 0.85);
-}
-
-.preloader-bar {
-  height: 12px;
-  overflow: hidden;
-  border-radius: 999px;
-  background: rgba(255,255,255,0.12);
-}
-
-.preloader-bar span {
-  display: block;
-  height: 100%;
-  width: 45%;
-  border-radius: inherit;
-  background: linear-gradient(90deg, var(--pink), var(--yellow), var(--cyan));
-  animation: loadingBar 1.1s infinite ease-in-out;
-}
-
-@keyframes loadingBar {
-  0% {
-    transform: translateX(-110%);
-  }
-  100% {
-    transform: translateX(250%);
-  }
-}
-
-.preloader-subtitle {
-  margin-top: 16px;
-  color: var(--muted);
-  font-size: 14px;
 }
 
 /* ================= APP ================= */
@@ -369,19 +324,20 @@ h1 span {
 .player-cell {
   display: flex;
   align-items: center;
-  gap: 14px;
+  gap: 16px;
 }
 
+/* УВЕЛИЧЕННЫЕ АВАТАРКИ */
 .avatar-wrap {
   position: relative;
-  width: 58px;
-  height: 58px;
-  flex: 0 0 58px;
+  width: 80px;
+  height: 80px;
+  flex: 0 0 80px;
 }
 
 .avatar {
-  width: 58px;
-  height: 58px;
+  width: 80px;
+  height: 80px;
   border-radius: 18px;
   object-fit: cover;
   border: 2px solid rgba(255,255,255,0.22);
@@ -391,9 +347,9 @@ h1 span {
 
 .leader-crown {
   position: absolute;
-  top: -19px;
-  right: -13px;
-  font-size: 26px;
+  top: -24px;
+  right: -18px;
+  font-size: 36px;
   transform: rotate(16deg);
   filter: drop-shadow(0 0 8px rgba(255, 230, 109, 0.8));
 }
