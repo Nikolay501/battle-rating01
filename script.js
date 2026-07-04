@@ -159,12 +159,12 @@ function initPreloader() {
     
     const rot = (Math.random() * 24 - 12).toFixed(1); 
     card.style.setProperty('--final-rot', `${rot}deg`);
-    card.style.animationDelay = `${index * 0.1}s`; 
+    card.style.animationDelay = `${index * 0.3}s`; 
     
     stack.appendChild(card);
   });
 
-  const totalPreloaderTime = (shuffledPlayers.length * 0.6 + 0.6 + 0.5) * 1000;
+  const totalPreloaderTime = (shuffledPlayers.length * 0.3 + 0.6 + 0.3) * 1000;
 
   setTimeout(() => {
     preloader.classList.add("hidden");
