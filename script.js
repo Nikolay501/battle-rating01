@@ -159,7 +159,7 @@ function initPreloader() {
     
     const rot = (Math.random() * 24 - 12).toFixed(1); 
     card.style.setProperty('--final-rot', `${rot}deg`);
-    card.style.animationDelay = `${index * 0.3}s`; 
+    card.style.animationDelay = `${index * 0.1}s`; 
     
     stack.appendChild(card);
   });
