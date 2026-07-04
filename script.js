@@ -1,51 +1,59 @@
 // ===============================
-// ДАННЫЕ ИГРОКОВ
-// Добавь обычную картинку (avatar) и грустную (sadAvatar)
+// ССЫЛКА НА ТВОЮ GOOGLE ТАБЛИЦУ (CSV)
 // ===============================
-const players = [
-  {
-    name: "Николай",
-    wins: 2,
-    kills: 5,
-    title: "Архимаг хаоса",
-    avatar: "Nikolay.jpg",
-    sadAvatar: "Nikolay-sad.jpg" // <-- Грустный Коля
-  },
-  {
-    name: "Данила",
-    wins: 1,
-    kills: 1,
-    title: "Повелитель критов",
-    avatar: "Danila.jpg",
-    sadAvatar: "Danila-sad.jpg" // <-- Грустный Данила
-  },
-  {
-    name: "Александр",
-    wins: 1,
-    kills: 2,
-    title: "Заклинатель боли",
-    avatar: "Sasha.jpg",
-    sadAvatar: "Sasha-sad.jpg" // <-- Грустный Саша
-  },
-  {
-    name: "Никита",
-    wins: 0,
-    kills: 0,
-    title: "Олух",
-    avatar: "Nikita.jpg",
-    sadAvatar: "Nikita-sad.jpg" // <-- Грустный Никита
-  }
-];
+const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTloYyzz7VIh04NraWDeVELCRKLoW3qfsP2lwWV3M3qiOIBKlcZl6PNkWm4WdKYyz8OH7Ml1bED46Iw/pub?gid=0&single=true&output=csv";
+
+let players = [];
+let sortedPlayers = [];
 
 // ===============================
-// СОРТИРОВКА РЕЙТИНГА
+// ЗАГРУЗКА ДАННЫХ ИЗ ТАБЛИЦЫ
 // ===============================
-const sortedPlayers = [...players].sort((a, b) => {
-  if (b.wins !== a.wins) {
-    return b.wins - a.wins;
+async function fetchPlayers() {
+  try {
+    const response = await fetch(CSV_URL);
+    const csvText = await response.text();
+    
+    // Разбиваем текст на строки и убираем пустые
+    const lines = csvText.split('\n').filter(line => line.trim() !== '');
+    
+    // Заголовки (первая строка: name, wins, kills, title, avatar, sadAvatar)
+    const headers = lines[0].split(',').map(h => h.trim());
+    
+    players = [];
+    
+    // Читаем со второй строки (индекс 1)
+    for (let i = 1; i < lines.length; i++) {
+      const values = lines[i].split(',');
+      const player = {};
+      
+      headers.forEach((header, index) => {
+        // Убираем лишние пробелы и возможные невидимые символы
+        let val = values[index] ? values[index].trim() : ""; 
+        
+        // Если это цифры, превращаем текст в числа
+        if (header === 'wins' || header === 'kills') {
+          val = parseInt(val) || 0;
+        }
+        
+        player[header] = val;
+      });
+      
+      players.push(player);
+    }
+
+    // Сортируем: сначала победы, потом жертвы
+    sortedPlayers = [...players].sort((a, b) => {
+      if (b.wins !== a.wins) {
+        return b.wins - a.wins;
+      }
+      return b.kills - a.kills;
+    });
+
+  } catch (error) {
+    console.error("Ошибка при загрузке данных:", error);
   }
-  return b.kills - a.kills;
-});
+}
 
 const ratingBody = document.getElementById("ratingBody");
 
@@ -58,11 +66,10 @@ function renderRating() {
   sortedPlayers.forEach((player, index) => {
     const place = index + 1;
     const isLeader = place === 1;
-    const isLoser = place === sortedPlayers.length; // Проверка на последнее место
+    const isLoser = place === sortedPlayers.length; // Последнее место
 
-    // Если игрок на последнем месте, ставим его личную грустную картинку
-    // (Если вдруг забыл добавить sadAvatar, поставится обычная)
-    const displayAvatar = isLoser ? (player.sadAvatar || player.avatar) : player.avatar;
+    // Если игрок на последнем месте, ставим грустную картинку (если она есть в таблице)
+    const displayAvatar = isLoser && player.sadAvatar ? player.sadAvatar : player.avatar;
 
     const tr = document.createElement("tr");
     tr.className = isLeader ? "leader" : "";
@@ -122,8 +129,14 @@ function getStatus(place) {
 // ===============================
 // ПРЕЛОАДЕР И СТАРТОВЫЕ АНИМАЦИИ
 // ===============================
-window.addEventListener("load", () => {
+window.addEventListener("load", async () => {
+  // Ждем, пока скачаются данные из Google Таблицы
+  await fetchPlayers();
+  
+  // Рисуем рейтинг
   renderRating();
+  
+  // Запускаем прелоадер с картами
   initPreloader();
 });
 
@@ -132,19 +145,16 @@ function initPreloader() {
   const preloader = document.getElementById("preloader");
   const app = document.getElementById("app");
 
-  // Идеально рандомное перемешивание массива (Алгоритм Фишера-Йетса)
+  // Рандомное перемешивание карточек
   const shuffledPlayers = [...players];
   for (let i = shuffledPlayers.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
     [shuffledPlayers[i], shuffledPlayers[j]] = [shuffledPlayers[j], shuffledPlayers[i]];
   }
 
-  // Создаем карты
   shuffledPlayers.forEach((p, index) => {
     const card = document.createElement("div");
     card.className = "preloader-player-card";
-    
-    // В прелоадере показываем всегда нормальные лица (чтобы не спойлерить кто проиграл)
     card.style.backgroundImage = `url('${p.avatar}')`;
     
     const rot = (Math.random() * 24 - 12).toFixed(1); 
@@ -171,7 +181,6 @@ function initPreloader() {
 // ===============================
 function startLeaderCelebration() {
   const leaderRow = document.querySelector(".rating-table tbody tr.leader");
-
   if (!leaderRow) return;
 
   leaderRow.style.position = "relative";
